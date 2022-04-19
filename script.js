@@ -1,6 +1,6 @@
 // client is on port 5500
 // socket server is on port 3000
-// index.html (frontend) <-> script is client-side server <->  index.js is backend socket server
+// index.html (UI) <-> script is client-side server <->  index.js is backend socket server
 
 const socket = io('http://localhost:3000')
 
@@ -9,4 +9,31 @@ const messageForm = document.getElementById('send-container')
 const messageInput = document.getElementById('message-input')
 
 let name = prompt('What is your name');
+appendMessage('You joined')
 socket.emit('new-user', name);
+
+socket.on('user-connected', name => {
+    appendMessage(`${name} connected`)
+})
+
+socket.on('show-chat-message', data => {
+    appendMessage(`${data.name} : ${data.message}`);
+})
+
+socket.on('user-disconnected', name => {
+    appendMessage(`${name} disconnected`)
+})
+
+messageForm.addEventListener('submit', e=> {
+    e.preventDefault();
+    const message = messageInput.value;
+    appendMessage(`You : ${message}`);
+    socket.emit('send-chat-message', message);
+    messageInput.value = '';
+})
+
+function appendMessage(message){
+    const messageElement = document.createElement('div');// <div></div>
+    messageElement.innerText = message;// <div>message</div>
+    messageContainer.append(messageElement);
+}
